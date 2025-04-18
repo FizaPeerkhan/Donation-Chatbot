@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donation Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      background-color: #1b5e20;
+      color: white;
+      width: 100%;
+      padding: 20px 0;
+      margin: 0;
+      font-size: 1.8rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #chatbox {
+      width: 90%;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      border: 2px solid #2e7d32;
+      height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user, .bot {
+      margin: 8px 0;
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      line-height: 1.4;
+      position: relative;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #a5d6a7;
+      color: #1b5e20;
+      text-align: right;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: #c8e6c9;
+      color: #1b5e20;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #userInput {
+      width: 70%;
+      max-width: 500px;
+      padding: 12px;
+      font-size: 1rem;
+      border: 2px solid #2e7d32;
+      border-radius: 10px;
+      margin-top: auto;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    #userInput:focus {
+      border-color: #388e3c;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      margin-left: 10px;
+      background: #1b5e20;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2e7d32;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #a5d6a7;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: #f0f0f0;
+    }
+
+    p {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Donation Chatbot!</h1>
+  <p>Start chatting with our donation assistant below:</p>
+
+  <div id="chatbox">
+    <p class="bot">Bot: Hello! How can I assist you?</p>
+  </div>
+
+  <div style="margin-bottom: 30px;">
+    <input type="text" id="userInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    function sendMessage() {
+      let input = document.getElementById("userInput").value;
+      let chatbox = document.getElementById("chatbox");
+
+      if (input.trim() === "") return;
+
+      chatbox.innerHTML += `<p class='user'>You: ${input}</p>`;
+
+      fetch("http://127.0.0.1:8000/chatbot/get-response/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input })
+      })
+      .then(response => response.json())
+      .then(data => {
+        chatbox.innerHTML += `<p class='bot'>Bot: ${data.response}</p>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        chatbox.innerHTML += `<p class='bot'>Bot: Error communicating with server.</p>`;
+      });
+
+      document.getElementById("userInput").value = "";
+    }
+  </script>
+</body>
+</html>
